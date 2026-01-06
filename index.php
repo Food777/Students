@@ -2,7 +2,7 @@
 session_start();
 error_reporting(E_ALL);
 
-// koneksi
+// koneksi database
 $con = mysqli_connect("localhost","root","","siswa");
 if (mysqli_connect_errno()) {
     echo "Failed to connect: " . mysqli_connect_error();
@@ -10,7 +10,7 @@ if (mysqli_connect_errno()) {
 
 // --- PAGINATION ---
 $limit = 10;  // jumlah record per halaman
-$page  = isset($_GET['page']) ? $_GET['page'] : 1;
+$page  = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $start = ($page - 1) * $limit;
 
 $sql = "SELECT * FROM students LIMIT $start, $limit";
@@ -23,14 +23,16 @@ $total = $total_row["total"];
 
 $total_pages = ceil($total / $limit);
 ?>
+
+<!DOCTYPE html>
 <html>
 <head>
     <title>Students Table</title>
     <style>
+        body { font-family: Arial; }
         table { border-collapse: collapse; width: 90%; margin: 20px auto; }
         th, td { border: 1px solid #444; padding: 8px 12px; text-align: left; }
         th { background-color: #eee; }
-        body { font-family: Arial; }
         .pagination { text-align:center; margin-top:20px; }
         .pagination a {
             padding: 8px 12px;
@@ -43,13 +45,17 @@ $total_pages = ceil($total / $limit);
             background: #333;
             color: white;
         }
+        .actions a {
+            margin-right: 5px;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
 
 <h2 style="text-align:center;">Students Data</h2>
 
-<div style="text-align:center;">
+<div style="text-align:center; margin-bottom: 15px;">
     <a href="add.php">➕ Tambah Data Siswa</a>
 </div>
 
@@ -64,9 +70,10 @@ $total_pages = ceil($total / $limit);
         <th>Active</th>
         <th>Tgl Mulai</th>
         <th>Tgl Selesai</th>
+        <th>Aksi</th>
     </tr>
 
-    <?php while ($row = mysqli_fetch_array($rs, MYSQLI_ASSOC)) { ?>
+    <?php while ($row = mysqli_fetch_assoc($rs)) { ?>
         <tr>
             <td><?= $row["id"] ?></td>
             <td><?= $row["id_siswa"] ?></td>
@@ -74,9 +81,13 @@ $total_pages = ceil($total / $limit);
             <td><?= $row["nama"] ?></td>
             <td><?= $row["tanggal_lahir"] ?></td>
             <td><?= $row["alamat"] ?></td>
-            <td style='text-align:center;'><?= $row["active"] == 1 ? "Ya" : "Tidak"?></td>
+            <td style="text-align:center;"><?= $row["active"] == 1 ? "Ya" : "Tidak" ?></td>
             <td><?= $row["tanggal_mulai"] ?></td>
             <td><?= $row["tanggal_selesai"] ?></td>
+            <td class="actions">
+                <a href="edit.php?id=<?= $row['id'] ?>">Edit</a>
+                <a href="delete.php?id=<?= $row['id'] ?>" onclick="return confirm('Yakin ingin menghapus data ini?')">Hapus</a>
+            </td>
         </tr>
     <?php } ?>
 </table>
